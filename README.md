@@ -1,5 +1,5 @@
 This project was taken from the book "Cracking the Data Engineering Interview"
-Page 32
+Page 32 - 44
 
 
 This is the data pipeline highlevel architecture
