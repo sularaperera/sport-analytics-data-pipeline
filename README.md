@@ -44,7 +44,20 @@ basic code we can use to scrape table content from most static sites using Beaut
 little to no cleaning:
 
 
-
+# connect to Azure SQL database via VScode using SQL server extemsion
+Install "SQL Server (mssql)" extenstion
+Profile Name : any name you like : I have put "sport-analytics"
+Connection Group : Default
+Input Type: Parameters
+Server name: sport-analytics-server.database.windows.net ( this is from Azure server overview)
+Port: 1433 (default)
+Trust server certificate - unticked
+Authentication type: SQL Login
+User name: Sulara
+Password: slr@8315
+You can now test connection
+or click on Database name: to see the database you have created in Azure sql server
+Then click "Connect" 
 
 
 
@@ -83,3 +96,26 @@ Found it: pandas 3.0.6 can't recognize the SQLAlchemy 2.0.20 engine, causing tha
 The firewall fix worked; the new error comes from a package version mismatch, not the database.
 
 The cause: your project has pandas 3.0.6 but pins sqlalchemy==2.0.20 in pyproject.toml. pandas 3 doesn't recognise engines from a SQLAlchemy that old. It treats yours as a raw database connection, so df.to_sql(...) fails with:
+
+
+
+# Challenge faced when running github actions
+
+The log shows the cause. Python, the packages and the Blob upload all worked. The run fails at the first Azure SQL connection with Login timeout expired (HYT00), which means the runner couldn't reach the SQL server or finish logging in before the driver gave up (about 15 seconds by default).
+
+That also means my earlier guess about uv run --no-project was wrong. The packages were found, so that line wasn't the problem.
+
+Likely causes, most likely first:
+
+The database is serverless and was auto-paused. A paused serverless Azure SQL database takes 30–60 seconds to wake up, so the first login times out. The next run then often succeeds. To check, open the database in the Azure Portal and look at Overview → Compute tier. If it says "Serverless" and the status is "Paused", this is the cause. You can fix it with a longer timeout plus a retry (code below), or by turning auto-pause off. With a run every 15 minutes, the database may rarely pause anyway, depending on your auto-pause delay.
+Public network access is turned off or limited. Go to the SQL server → Networking. If public access is "Disabled", or set to "Selected networks" with only a private endpoint, GitHub runners can't get through, and you get a timeout rather than an error message. Enable public access with a firewall rule. A blocked IP usually gives a clear "Client with IP address … is not allowed" error instead of a timeout, so the firewall alone is less likely.
+The server name is incomplete. The AZURE_SQL_SERVER secret needs the full name, yourserver.database.windows.net, not just yourserver.
+
+Code fix (in push_to_azure_sql.py or wherever you create the engine). This waits up to 60 seconds for each login and tries 3 times:
+
+
+I made a change to 
+"Connection Timeout": "60"
+in push_to_azure_sql.py
+
+and also on the Azure SQL Database "sport_analytics_db" - I have turned off the "Auto-pause delay" 
