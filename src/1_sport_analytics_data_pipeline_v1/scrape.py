@@ -3,6 +3,9 @@ from bs4 import BeautifulSoup
 import pandas as pd
 import numpy as np
 
+# BBC can block or serve a different page to requests without a browser
+# User-Agent (common on cloud runners like GitHub Actions)
+HEADERS = {"User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/124.0 Safari/537.36"}
 
 
 def league_table():
@@ -14,12 +17,15 @@ def league_table():
     # the page link we want to extract data from
     url = "https://www.bbc.com/sport/football/premier-league/table"
     headers = ['Position']
-    page  = requests.get(url)
+    page  = requests.get(url, headers=HEADERS, timeout=30)
+    page.raise_for_status()
     page.encoding = 'utf-8'
     soup = BeautifulSoup(page.text, 'html.parser')
 
     # find the table
     table = soup.find('table', {'data-testid': 'football-table'})
+    if table is None:
+        raise RuntimeError(f"League table not found on {url} (page layout changed or request blocked)")
 
 
     for i in table.find_all('th'):
@@ -55,7 +61,8 @@ def top_scorers():
 
     # the page link we want to extract data from
     url = "https://www.bbc.com/sport/football/premier-league/top-scorers"
-    page  = requests.get(url)
+    page  = requests.get(url, headers=HEADERS, timeout=30)
+    page.raise_for_status()
     # BBC doesn't declare a charset, so requests falls back to Latin-1 and
     # accented names get garbled (e.g. "JoÃ£o"); the page is actually UTF-8
     page.encoding = 'utf-8'
@@ -63,6 +70,8 @@ def top_scorers():
 
     # find the table
     table = soup.find('table', {'data-testid': 'sport-table'})
+    if table is None:
+        raise RuntimeError(f"Top scorers table not found on {url} (page layout changed or request blocked)")
 
     # BBC renders every stat column twice - once with a full label for desktop
     # and once abbreviated for mobile - and both copies hold the same value,

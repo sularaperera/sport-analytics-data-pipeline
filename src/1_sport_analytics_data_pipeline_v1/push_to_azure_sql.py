@@ -50,7 +50,7 @@ def get_engine():
             "driver": driver,
             "Encrypt": "yes",
             "TrustServerCertificate": "no",
-            "Connection Timeout": "30",
+            "Connection Timeout": "60",
         },
     )
     # fast_executemany speeds up bulk inserts from pandas a lot

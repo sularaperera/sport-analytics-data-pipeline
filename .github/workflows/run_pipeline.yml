@@ -39,6 +39,22 @@ jobs:
       - name: Install Python dependencies
         run: uv sync --locked --no-install-project
 
+      # fails early with a clear message if a repo secret is missing/misnamed
+      # (only prints the names, never the values)
+      - name: Check secrets are set
+        env:
+          AZURE_STORAGE_CONNECTION_STRING: ${{ secrets.AZURE_STORAGE_CONNECTION_STRING }}
+          AZURE_SQL_SERVER: ${{ secrets.AZURE_SQL_SERVER }}
+          AZURE_SQL_DATABASE: ${{ secrets.AZURE_SQL_DATABASE }}
+          AZURE_SQL_USERNAME: ${{ secrets.AZURE_SQL_USERNAME }}
+          AZURE_SQL_PASSWORD: ${{ secrets.AZURE_SQL_PASSWORD }}
+        run: |
+          missing=0
+          for name in AZURE_STORAGE_CONNECTION_STRING AZURE_SQL_SERVER AZURE_SQL_DATABASE AZURE_SQL_USERNAME AZURE_SQL_PASSWORD; do
+            if [ -z "${!name}" ]; then echo "::error::Secret $name is empty or missing"; missing=1; else echo "$name is set"; fi
+          done
+          exit $missing
+
       - name: Run pipeline
         working-directory: src/1_sport_analytics_data_pipeline_v1
         env:
