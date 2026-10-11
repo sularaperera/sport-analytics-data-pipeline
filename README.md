@@ -1,8 +1,8 @@
 <div align="center">
 
-# ⚽ Sport Analytics Data Pipeline
+# Sport Analytics Data Pipeline
 
-**An end-to-end, cloud-based ELT pipeline that extracts English Premier League data from the web and a REST API, lands it in Azure as Parquet, loads it into Azure SQL, and runs on GitHub Actions.**
+**An end-to-end, cloud-based ELT pipeline that extracts Premier League data from the web and a REST API, lands it in Azure as Parquet, loads it into Azure SQL, and runs on GitHub Actions.**
 
 ![Python](https://img.shields.io/badge/Python-3.11-3776AB?logo=python&logoColor=white)
 ![pandas](https://img.shields.io/badge/pandas-150458?logo=pandas&logoColor=white)
@@ -17,24 +17,7 @@
 
 ---
 
-## 📌 Table of Contents
-
-- [Overview](#-overview)
-- [Architecture](#-architecture)
-- [Tech Stack](#-tech-stack)
-- [Data Sources](#-data-sources)
-- [Pipeline Workflow](#-pipeline-workflow)
-- [Data Outputs](#-data-outputs)
-- [Project Structure](#-project-structure)
-- [Getting Started](#-getting-started)
-- [CI/CD with GitHub Actions](#-cicd-with-github-actions)
-- [Challenges & Lessons Learned](#-challenges--lessons-learned)
-- [Roadmap](#-roadmap)
-- [Acknowledgements](#-acknowledgements)
-
----
-
-## 🧭 Overview
+## Overview
 
 Football data changes every matchweek. League standings, top scorers and team details are spread across web pages and APIs, and none of it arrives in a form that is ready for analysis.
 
@@ -46,34 +29,17 @@ This project automates the full journey from **raw source → cloud storage → 
 - **Load (serving layer):** write the same datasets to **Azure SQL Database** as `dbo` tables, ready for BI tools.
 - **Orchestrate:** run the whole pipeline in **GitHub Actions**, with credentials kept in GitHub Secrets.
 
-> 🎯 **Goal:** practise the core building blocks of a production data pipeline: multi-source ingestion, cloud storage, relational loading, secrets management and CI/CD orchestration.
 
 ---
 
-## 🏗 Architecture
+## Architecture
 
 ![High-level architecture](images/High-level%20architecture.png)
 
-```
- ┌──────────────────────┐     ┌──────────────────────────┐     ┌────────────────────────┐     ┌──────────────┐
- │  SOURCES             │     │  EXTRACT & TRANSFORM     │     │  LOAD & STORE (Azure)  │     │  SERVE       │
- │                      │     │  Python · pandas         │     │                        │     │              │
- │  BBC League Table ───┼──┐  │                          │     │  Azure Blob Storage    │     │              │
- │  BBC Top Scorers  ───┼──┼─►│  scrape.py               │──┬─►│  (Parquet, raw layer)  │     │  Power BI    │
- │  TheSportsDB API  ───┼──┴─►│  api_ingest.py           │  │  │                        │     │  (planned)   │
- │                      │     │                          │  └─►│  Azure SQL Database    │────►│              │
- └──────────────────────┘     └──────────────────────────┘     │  (dbo tables, serving) │     └──────────────┘
-                                         ▲                     └────────────────────────┘
-                                         │ runs
-                              ┌──────────┴───────────┐
-                              │  GitHub Actions      │
-                              │  run_pipeline.yml    │
-                              └──────────────────────┘
-```
 
 ---
 
-## 🛠 Tech Stack
+## Tech Stack
 
 | Layer | Technology | Purpose |
 |---|---|---|
@@ -90,7 +56,7 @@ This project automates the full journey from **raw source → cloud storage → 
 
 ---
 
-## 🌐 Data Sources
+## Data Sources
 
 | Dataset | Source | Type | Extraction method |
 |---|---|---|---|
@@ -102,7 +68,7 @@ This project automates the full journey from **raw source → cloud storage → 
 
 ---
 
-## 🔄 Pipeline Workflow
+## Pipeline Workflow
 
 `run_pipeline.py` is the single entry point. For each dataset it runs:
 
@@ -125,7 +91,7 @@ for each dataset in [league_table, top_scorers, premier_league_teams]:
 
 ---
 
-## 📦 Data Outputs
+## Data Outputs
 
 | Dataset | Azure Blob (container `testtech`) | Azure SQL (`sport_analytics_db`) | Example columns |
 |---|---|---|---|
@@ -135,7 +101,7 @@ for each dataset in [league_table, top_scorers, premier_league_teams]:
 
 ---
 
-## 📁 Project Structure
+## Project Structure
 
 ```
 sport-analytics-data-pipeline/
@@ -161,7 +127,7 @@ sport-analytics-data-pipeline/
 
 ---
 
-## 🚀 Getting Started
+## Getting Started
 
 ### Prerequisites
 
@@ -201,7 +167,7 @@ AZURE_SQL_PASSWORD=<your-password>
 AZURE_SQL_DRIVER=ODBC Driver 17 for SQL Server
 ```
 
-> 🔒 `.env` is git-ignored. Never commit real credentials.
+> `.env` is git-ignored. Never commit real credentials.
 
 ### 4. Run the pipeline
 
@@ -238,7 +204,7 @@ league_table successfully loaded (20 rows)
 
 ---
 
-## ⚙️ CI/CD with GitHub Actions
+## CI/CD with GitHub Actions
 
 The workflow [`.github/workflows/run_pipeline.yml`](.github/workflows/run_pipeline.yml):
 
@@ -267,7 +233,7 @@ The workflow [`.github/workflows/run_pipeline.yml`](.github/workflows/run_pipeli
 
 ---
 
-## 🧩 Challenges & Lessons Learned
+## Challenges & Lessons Learned
 
 | Challenge | Root cause | Fix |
 |---|---|---|
@@ -281,9 +247,9 @@ The workflow [`.github/workflows/run_pipeline.yml`](.github/workflows/run_pipeli
 
 ---
 
-## 🗺 Roadmap
+## Roadmap
 
-- [ ] Enable the **weekend cron schedule** in GitHub Actions for the season
+- [ ] Enable the **timely cron schedule** in GitHub Actions for the season
 - [ ] Connect **Power BI** to Azure SQL and build EDA dashboards
 - [ ] Keep **history**: date-partitioned Parquet paths (`/yyyy/mm/dd/`) and append-mode snapshots instead of full replace
 - [ ] Add **data quality checks** (row counts, nulls, schema validation) before loading
@@ -291,15 +257,6 @@ The workflow [`.github/workflows/run_pipeline.yml`](.github/workflows/run_pipeli
 - [ ] Move to **Azure Key Vault + Managed Identity** (`DefaultAzureCredential`) so no keys are needed
 - [ ] Introduce a **medallion layout** (bronze/silver/gold) and **dbt** models for transformations
 - [ ] Add unit tests for the scrapers with saved HTML fixtures
-
----
-
-## 🙏 Acknowledgements
-
-- Based on the project outline in ***Cracking the Data Engineering Interview*** (Packt).
-- Data courtesy of [BBC Sport](https://www.bbc.com/sport/football) and [TheSportsDB](https://www.thesportsdb.com/).
-
-> ⚠️ This project is for educational purposes only. Respect each source's terms of use when scraping.
 
 ---
 
