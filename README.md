@@ -262,8 +262,7 @@ The workflow [`.github/workflows/run_pipeline.yml`](.github/workflows/run_pipeli
 
 <div align="center">
 
-**Built by [Sulara Perera](https://github.com/sularaperera)** · Data & Automation Engineer · Auckland, NZ 🇳🇿
-
-⭐ If you found this project useful, consider giving it a star!
+**Built by [Sulara Perera](https://github.com/sularaperera)** · Data & Automation Engineer · Auckland, NZ
+⭐ If you found this project useful, consider giving it a star. Thank you!
 
 </div>
