@@ -1,5 +1,5 @@
 <div align="center">
-![Cover](images/GitHub_cover.png)
+![GitHub_cover](images/GitHub_cover.png)
     
 # Sport Analytics Data Pipeline
 
