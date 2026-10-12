@@ -1,5 +1,6 @@
 <div align="center">
-
+![Cover](images/GitHub_cover.png)
+    
 # Sport Analytics Data Pipeline
 
 **An end-to-end, cloud-based ELT pipeline that extracts Premier League data from the web and a REST API, lands it in Azure as Parquet, loads it into Azure SQL, and runs on GitHub Actions.**
